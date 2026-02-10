@@ -5,13 +5,6 @@ on:
     branches:
       - main
       - develop
-    paths:
-      - 'agent_engine/**'
-      - 'mcp_server/**'
-      - 'Dockerfile'
-      - 'docker-compose.yml'
-      - 'requirements.txt'
-      - '.github/workflows/docker-push.yml'
 
 jobs:
   build-and-push:
@@ -62,12 +55,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/secureorder-mcp-vault:latest
             ${{ secrets.DOCKER_HUB_USERNAME }}/secureorder-mcp-vault:${{ github.sha }}
-
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ secrets.DOCKER_HUB_USERNAME }}/secureorder-ai
-          short-description: "AI Agent for Secure Orders"
-          readme-filepath: ./README.md
