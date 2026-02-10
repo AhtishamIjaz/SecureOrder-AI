@@ -10,22 +10,18 @@ RUN apt-get update && apt-get install -y \
 
 # Copy dependency files
 COPY requirements.txt .
+COPY agent_engine/requirements.txt .
 COPY pyproject.toml .
-COPY agent_engine/requirements.txt agent_engine/
-COPY mcp_server/requirements.txt mcp_server/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r agent_engine/requirements.txt && \
-    pip install --no-cache-dir -r mcp_server/requirements.txt
+    pip install --no-cache-dir -f requirements.txt -r agent_engine/requirements.txt
 
 # Copy application code
+COPY agent_engine/ .
 COPY . .
 
-# Create data directory
-RUN mkdir -p mcp_server/data
-
-# Expose port
+# Expose Streamlit port
 EXPOSE 8501
 
 # Set environment variables
@@ -34,5 +30,5 @@ ENV STREAMLIT_SERVER_PORT=8501
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 ENV STREAMLIT_SERVER_HEADLESS=true
 
-# Start the app
-CMD ["python", "main.py"]
+# Start Streamlit app
+CMD ["streamlit", "run", "src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

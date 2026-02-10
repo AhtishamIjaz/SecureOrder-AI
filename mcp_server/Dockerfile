@@ -10,29 +10,26 @@ RUN apt-get update && apt-get install -y \
 
 # Copy dependency files
 COPY requirements.txt .
+COPY mcp_server/requirements.txt ./mcp_server/
 COPY pyproject.toml .
-COPY agent_engine/requirements.txt agent_engine/
-COPY mcp_server/requirements.txt mcp_server/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r agent_engine/requirements.txt && \
     pip install --no-cache-dir -r mcp_server/requirements.txt
 
 # Copy application code
+COPY mcp_server/ ./mcp_server/
 COPY . .
 
 # Create data directory
 RUN mkdir -p mcp_server/data
 
-# Expose port
-EXPOSE 8501
+# Expose MCP port
+EXPOSE 8000
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-ENV STREAMLIT_SERVER_HEADLESS=true
+ENV DATABASE_PATH=/app/mcp_server/data/orders.db
 
-# Start the app
-CMD ["python", "main.py"]
+# Start MCP server
+CMD ["python", "-m", "uvicorn", "mcp_server.src.server:app", "--host", "0.0.0.0", "--port", "8000"]

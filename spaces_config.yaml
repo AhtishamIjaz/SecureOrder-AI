@@ -1,0 +1,9 @@
+title: SecureOrder AI
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+sdk_version: latest
+app_port: 8501
+fullWidth: false
+pinned: false
