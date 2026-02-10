@@ -1,0 +1,30 @@
+# --- Python & Environment ---
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# --- Security & Keys (EXTREMELY IMPORTANT) ---
+.env
+*.pem
+*.key
+secrets.json
+
+# --- Database ---
+# We ignore the actual .db file so you don't overwrite production data 
+# with your local testing data.
+mcp_server/data/*.db
+mcp_server/data/*.db-journal
+
+# --- OS & Editors ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Build & Docker ---
+.docker/
+dist/
+build/
+*.egg-info/

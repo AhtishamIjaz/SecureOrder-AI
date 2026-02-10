@@ -1,0 +1,23 @@
+name: Deploy to Hugging Face
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # We use your specific username and space name here
+          git remote add hf https://shamiimuhammad:$HF_TOKEN@huggingface.co/spaces/shamiimuhammad/SecureOrder-AI
+          # This forces the update to your Space whenever you push to GitHub
+          git push --force hf main
