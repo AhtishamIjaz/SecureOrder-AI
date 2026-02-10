@@ -1,40 +1,35 @@
-# 1. Base Image
+# 1. Use a stable base
 FROM python:3.11-slim
 
-# 2. Environment Setup
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PORT=7860 \
-    UV_PROJECT_ENVIRONMENT=/usr/local
+# 2. Set the working directory inside the container
+WORKDIR /app
 
-# 3. System Dependencies
+# 3. Install system dependencies (needed for many Python libraries)
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
-# 4. Work Directory
-WORKDIR /app
+# 4. Copy your requirements files specifically
+# (Assuming you have these files in these folders)
+COPY agent_engine/requirements.txt ./agent_engine/
+COPY mcp_server/requirements.txt ./mcp_server/
 
-# 5. Install UV (The modern way)
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# 5. Install Python packages
+RUN pip install --no-cache-dir -r agent_engine/requirements.txt
+RUN pip install --no-cache-dir -r mcp_server/requirements.txt
+RUN pip install --no-cache-dir streamlit
 
-# 6. Install Dependencies First
-# We copy ONLY these files first to take advantage of Docker Caching
-COPY pyproject.toml uv.lock ./
-RUN uv pip install --system --no-cache -r <(uv pip compile pyproject.toml) || \
-    uv pip install --system --no-cache streamlit langchain-openai fastmcp langgraph pydantic-settings sqlite3
-
-# 7. Copy Project Files
+# 6. Copy the entire project code
 COPY . .
 
-# 8. Initialize Database (Logic Protection)
-# This ensures the 'data' folder exists so SQLite doesn't crash
-RUN mkdir -p mcp_server/data && python mcp_server/src/database.py
+# 7. Logic Base: Create the data folder and initialize the database
+# This ensures the DB exists before the app starts
+RUN mkdir -p mcp_server/data
+RUN python mcp_server/src/database.py
 
-# 9. Hugging Face Requirements
+# 8. Hugging Face/Cloud port requirement
 EXPOSE 7860
 
-# 10. Start Command
+# 9. The command to run your app
 CMD ["streamlit", "run", "agent_engine/src/app.py", "--server.port=7860", "--server.address=0.0.0.0"]
