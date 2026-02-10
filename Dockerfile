@@ -2,24 +2,23 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# Install system tools
+RUN apt-get update && apt-get install -y curl git && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file we generated
-COPY requirements.txt .
+# Copy uv for fast installation
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# 1. Copy only the dependency files
+COPY pyproject.toml uv.lock ./
 
-# Copy all project files
+# 2. Install dependencies (Clean and simple)
+RUN uv pip install --system --no-cache .
+
+# 3. Copy the rest of your app
 COPY . .
 
-# Port 7860 is required for Hugging Face
+# 4. Hugging Face port
 EXPOSE 7860
 
-# Start the application using main.py
+# 5. Start the app
 CMD ["streamlit", "run", "main.py", "--server.port=7860", "--server.address=0.0.0.0"]
